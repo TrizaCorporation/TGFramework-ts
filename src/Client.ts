@@ -1,4 +1,4 @@
-import { DataStoreService } from "@rbxts/services"
+import { FrameworkSignal, FrameworkSignalType } from "./Dependencies/FrameworkSignal"
 
 interface Controller {
     Name: string,
@@ -9,9 +9,11 @@ interface Controller {
 export default class FrameworkClient {
     Started: boolean
     Controllers: Map<string, Controller>
+    OnStart: FrameworkSignalType
     constructor() {
         this.Controllers = new Map()
         this.Started = false
+        this.OnStart = new FrameworkSignal()
     }
 
     Start(){
@@ -23,10 +25,16 @@ export default class FrameworkClient {
                 task.spawn(Data.Start)
             }
         }
+        this.OnStart.Fire(true)
     }
 
     CreateController(controllerName: string, data: Controller){
         assert(!this.Started, "Controllers can't be created after TGFramework has started.")
         this.Controllers.set(controllerName, data)
+    }
+
+    CreateSignal(signalType: string){
+        assert(signalType === "Event" || signalType === "Function", "Invalid Signal Type.")
+        return string.format("SignalPlaceHolder:%s", signalType)
     }
 }

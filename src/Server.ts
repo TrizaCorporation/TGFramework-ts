@@ -1,2 +1,5 @@
-export default function(){
+export default class FrameworkServer{
+    constructor(){
+        
+    }
 }

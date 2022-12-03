@@ -5,6 +5,8 @@
   /_/  \____/_/   /_/   \__,_/_/ /_/ /_/\___/|__/|__/\____/_/  /_/|_|  
 									  
   
+  TGFramework(ts)
+
   Programmer(s): CodedJimmy
   
 */
@@ -16,7 +18,8 @@ import Server from "./Server"
 export default function(){
 	if (RunService.IsServer()){
 		return Server
-	}else{
+	}
+	else{
 		return Client
 	}
 }

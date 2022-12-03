@@ -1,4 +1,4 @@
-import { FrameworkSignal, FrameworkSignalType } from "./Dependencies/FrameworkSignal"
+import { BetterSignal, BetterSignalType } from "@trizacorporation/bettersignal"
 
 interface Controller {
     Name: string,
@@ -9,28 +9,33 @@ interface Controller {
 export default class FrameworkClient {
     Started: boolean
     Controllers: Map<string, Controller>
-    OnStart: FrameworkSignalType
+    OnStart: BetterSignalType
     constructor() {
         this.Controllers = new Map()
         this.Started = false
-        this.OnStart = new FrameworkSignal()
+        this.OnStart = new BetterSignal()
     }
 
     Start(){
-        for (const [Controller, Data] of this.Controllers){
-            if (Data.Init){
-                Data.Init()
+        const Controllers = this.Controllers
+        const OnStart = this.OnStart
+        return Promise.try(function(){
+            for (const [ControllerName, Data] of Controllers){
+                if (Data.Init){
+                    Data.Init()
+                }
+                if (Data.Start){
+                    task.spawn(Data.Start)
+                }
             }
-            if (Data.Start){
-                task.spawn(Data.Start)
-            }
-        }
-        this.OnStart.Fire(true)
+            OnStart.Fire(true)
+        })
     }
 
     CreateController(controllerName: string, data: Controller){
         assert(!this.Started, "Controllers can't be created after TGFramework has started.")
         this.Controllers.set(controllerName, data)
+        return data
     }
 
     CreateSignal(signalType: string){

@@ -27,4 +27,13 @@ export default class FrameworkSignal {
             }
         }
     }
+
+    Wait(){
+        let WaitingCoroutine = coroutine.running()
+        let Connection = this.Connect(function(){
+            Connection.Disconnect()
+            task.spawn(WaitingCoroutine)
+        })
+        return coroutine.yield()
+    }
 }

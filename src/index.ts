@@ -18,8 +18,7 @@ import Server from "./Server"
 export default function(){
 	if (RunService.IsServer()){
 		return Server
-	}
-	else{
+	}else{
 		return Client
 	}
 }

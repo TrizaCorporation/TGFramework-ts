@@ -11,14 +11,10 @@
   
 */
   
-import { RunService } from "@rbxts/services";
-import Client from "./Client";
-import Server from "./Server"
+import FrameworkClient from "./Client";
+import FrameworkServer from "./Server"
 
-export default function(){
-	if (RunService.IsServer()){
-		return Server
-	}else{
-		return Client
-	}
+export {
+	FrameworkServer,
+	FrameworkClient
 }

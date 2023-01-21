@@ -32,7 +32,7 @@ export class Service {
 }
 
 function formatService(controller: Controller, serviceName: string){
-    const ServiceFolder = script.Parent?.FindFirstChild("Services") as Folder
+    const ServiceFolder = script.Parent?.Parent?.FindFirstChild("Services") as Folder
     const ServiceEvents = ServiceFolder?.FindFirstChild(serviceName) as Folder
     const ServiceSignals = ServiceEvents?.FindFirstChild("Signals") as Folder
     const ServiceFunctions = ServiceEvents?.FindFirstChild("Functions") as Folder
@@ -73,23 +73,21 @@ function formatService(controller: Controller, serviceName: string){
 /**
  * Returns the requested service, if there is one.
  * @param serviceName 
- * @returns {(Service | ClientServiceMarker)}
+ * @returns {(Service|ClientServiceMarker)}
  */
 
-export function GetService(serviceName: string){
+export function GetService(serviceName: string): (Service | ClientServiceMarker){
     if(RunService.IsClient()){
-        const ServiceFolder = script.Parent?.FindFirstChild("Services") as Folder
+        const ServiceFolder = script.Parent?.Parent?.FindFirstChild("Services") as Folder
         assert(ServiceFolder?.FindFirstChild(serviceName), "This service doesn't exist.")
         const pathItems = debug.traceback().split("GetService")[1].split(":")[0].split(".")
         const controllerName = pathItems[pathItems.size() - 1]
-        if(controllerName){
-            let FoundController = GetController(controllerName)
-            if (!FoundController) return;
-            return formatService(FoundController, serviceName)
-        }
+        let FoundController = GetController(controllerName)
+        assert(FoundController, "A Controller Wasn't Found")
+        return formatService(FoundController, serviceName) as ClientServiceMarker
     }else{
         assert(Services.get(serviceName), string.format("%s isn't a registered service.", serviceName))
-        return Services.get(serviceName)
+        return Services.get(serviceName) as Service
     }
 }
 

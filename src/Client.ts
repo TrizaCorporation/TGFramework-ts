@@ -1,7 +1,7 @@
 import { BetterSignal, BetterSignalType } from "@trizacorporation/bettersignal"
 import { TNetClient } from "@trizacorporation/tnet"
 import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
-import { Controller } from "./Dependencies"
+import { Controller, GetController } from "./Dependencies"
 
 export default class FrameworkClient {
     Started: boolean
@@ -26,7 +26,7 @@ export default class FrameworkClient {
             for (const [ControllerName, Info] of Controllers){
                 if(Info.Middleware){
                     const ControllerNetworkClient = new TNetClient(Info.Middleware)
-                    const ControllerData = Controllers.get(ControllerName)
+                    const ControllerData = GetController(ControllerName)
                     if (!ControllerData) return
                     if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
                     if (Middleware){

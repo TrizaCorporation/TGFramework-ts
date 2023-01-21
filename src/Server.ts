@@ -1,7 +1,7 @@
 import { BetterSignal, BetterSignalType } from "@trizacorporation/bettersignal"
 import { TNetServer } from "@trizacorporation/tnet"
 import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
-import { Service } from "./Dependencies"
+import { GetService, Service } from "./Dependencies"
 
 export default class FrameworkServer {
     Started: boolean
@@ -25,8 +25,8 @@ export default class FrameworkServer {
             MainServiceFolder.Name = "Services"
             MainServiceFolder.Parent = script.Parent
 
-            for (const [ControllerName, Info] of Services){
-                const ServiceData = Services.get(ControllerName)
+            for (const [ServiceName, Info] of Services){
+                const ServiceData = GetService(ServiceName) as Service
 
                 if(Info.Middleware){
                     const ServerNetworkServer = new TNetServer(Info.Middleware)

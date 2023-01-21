@@ -27,6 +27,12 @@ export function GetController(controllerName: string) {
     return Controllers.get(controllerName)
 }
 
+/**
+ * Returns all of the currently registered controllers.
+ * @returns {Map<string, Controller>}
+ * @deprecated
+ */
+
 export function GetAllControllers(){
     return Controllers
 }

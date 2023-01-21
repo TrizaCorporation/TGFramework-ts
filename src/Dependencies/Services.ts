@@ -70,6 +70,12 @@ function formatService(controller: Controller, serviceName: string){
     return Service
 }
 
+/**
+ * Returns the requested service, if there is one.
+ * @param serviceName 
+ * @returns {(Service | ClientServiceMarker)}
+ */
+
 export function GetService(serviceName: string){
     if(RunService.IsClient()){
         const ServiceFolder = script.Parent?.FindFirstChild("Services") as Folder

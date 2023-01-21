@@ -4,12 +4,18 @@ import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
 import { Controller } from "./Dependencies"
 
 export default class FrameworkClient {
-    Started: boolean = false
-    Controllers: Map<string, Controller> = new Map()
-    OnStart: BetterSignalType = new BetterSignal()
-    ClientNetwork: TNetClient = new TNetClient()
-    MiddlewareHandlers: Map<string, TNetClient> = new Map()
+    Started: boolean
+    Controllers: Map<string, Controller>
+    OnStart: BetterSignal
+    //ClientNetwork: TNetClient = new TNetClient()
+    //MiddlewareHandlers: Map<string, TNetClient> = new Map()
     Middleware?: Middleware
+
+    constructor(){
+        this.Started = false
+        this.Controllers = new Map()
+        this.OnStart = new BetterSignal()
+    }
 
 
     Start(Middleware?: Middleware){
@@ -17,17 +23,40 @@ export default class FrameworkClient {
         const Controllers = this.Controllers
         const OnStart = this.OnStart
         return Promise.try(function(){
-            for (const [_, Data] of Controllers){
-                if (Data.Initialize){
-                    Data.Initialize()
+            for (const [ControllerName, Info] of Controllers){
+                if(Info.Middleware){
+                    const ControllerNetworkClient = new TNetClient(Info.Middleware)
+                    const ControllerData = Controllers.get(ControllerName)
+                    if (!ControllerData) return
+                    if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
+                    if (Middleware){
+                        if(!ControllerData?.Middleware){
+                            ControllerData.Middleware = {
+                                Inbound: [],
+                                Outbound: []
+                            }
+                        }else{
+                            if(!ControllerData.Middleware.Inbound){
+                                ControllerData.Middleware.Inbound = []
+                            }
+                            if(!ControllerData.Middleware.Outbound){
+                                ControllerData.Middleware.Outbound = []
+                            }
+                        }
+                        if(Middleware.Inbound){
+                            for (const Handler of Middleware.Inbound){
+                                ControllerData.Middleware.Inbound?.push(Handler)
+                            }
+                        }
+                        if(Middleware.Outbound){
+                            for (const Handler of Middleware.Outbound){
+                                ControllerData.Middleware.Outbound?.push(Handler)
+                            }
+                        }
+                    }
                 }
-                if (Data.Start){
-                    task.spawn(Data.Start)
-                }
-                if(Data.Middleware){
-                    let ControllerNetworkClient = new TNetClient(Data.Middleware)
-                    Data.TNetClient = ControllerNetworkClient
-                }
+                Info.Initialize && Info.Initialize()
+                Info.Start && Info.Start()
             }
             OnStart.Fire(true)
             return true

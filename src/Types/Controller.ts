@@ -2,8 +2,8 @@ import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
 
 export interface Controller {
     Name: string,
-    Initialize?: Callback,
-    Start?: Callback,
+    Initialize?(): void,
+    Start?(): void,
     Middleware?: Middleware,
-    [key: string]: any
+    [key: string | number]: any
 }

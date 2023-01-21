@@ -1,6 +1,6 @@
 {
-  "name": "@rbxts/tgframework-ts",
-  "version": "1.0.0",
+  "name": "@trizacorporation/tgframework",
+  "version": "0.1.1",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@rbxts/services": "^1.5.1",
-    "@trizacorporation/bettersignal": "^0.1.0",
+    "@trizacorporation/bettersignal": "^0.1.2",
     "@trizacorporation/tnet": "^0.1.0"
   }
 }

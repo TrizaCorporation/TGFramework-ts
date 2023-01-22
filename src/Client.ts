@@ -24,11 +24,11 @@ export default class FrameworkClient {
         const OnStart = this.OnStart
         return Promise.try(function(){
             for (const [ControllerName, Info] of Controllers){
+                const ControllerNetworkClient = new TNetClient(Info.Middleware)
+                const ControllerData = GetController(ControllerName)
+                if (!ControllerData) return
+                if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
                 if(Info.Middleware){
-                    const ControllerNetworkClient = new TNetClient(Info.Middleware)
-                    const ControllerData = GetController(ControllerName)
-                    if (!ControllerData) return
-                    if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
                     if (Middleware){
                         if(!ControllerData?.Middleware){
                             ControllerData.Middleware = {

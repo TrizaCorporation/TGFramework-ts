@@ -18,7 +18,7 @@ jobs:
           node-version: 18
           cache: npm
       - name: Install Code Dependencies
-        run: npm install
+        run: npm install && npm i -g roblox-ts
       - name: Install dependencies
         run: cd docs && npm install --frozen-lockfile
       - name: Build website

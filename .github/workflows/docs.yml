@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: 18
           cache: npm
+      - name: Install Code Dependencies
+        run: npm install
       - name: Install dependencies
         run: cd docs && npm install --frozen-lockfile
       - name: Build website

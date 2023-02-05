@@ -1,4 +1,5 @@
 ---
+tags: [intro]
 ---
 
 This will guide will show you how to install, and begin using TGFramework-ts.
@@ -65,5 +66,22 @@ const TGFramework = new FrameworkServer()
 const Directory = script.Parent
 
 TGFramework.AddServices(Directory)
+```
+
+## Starting the Server/Client
+
+To start your Server/Client, simply run the .Start() method like so:
+
+```ts
+import { FrameworkServer } from "@rbxts/tgframework"
+
+const TGFramework = new FrameworkServer()
+
+const Directory = script.Parent
+
+TGFramework.AddServices(Directory)
+
+
+TGFramework.Start()
 ```
 

@@ -1,7 +1,9 @@
 ---
 sidebar_position: 1
 id: Introduction
+tags: [intro]
 ---
+An introduction to TGFramework-ts.
 
 ## Welcome
 

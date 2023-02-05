@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[880],{9082:e=>{e.exports=JSON.parse('{"label":"sample","permalink":"/docs/tags/sample","allTagsPath":"/docs/tags","count":1,"items":[{"id":"Samples/Service","title":"Service","description":"A sample service example using TGFramework-ts.","permalink":"/docs/Samples/Service"}]}')}}]);

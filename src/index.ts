@@ -13,10 +13,10 @@
   
 import FrameworkClient from "./Client";
 import FrameworkServer from "./Server"
-import * as Dependencies from "./Dependencies"
 
 export {
 	FrameworkServer,
-	FrameworkClient,
-   Dependencies
+	FrameworkClient
 }
+
+export * from "./Dependencies"

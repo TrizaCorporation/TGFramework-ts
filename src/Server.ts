@@ -1,6 +1,5 @@
-import { BetterSignal, BetterSignalType } from "@trizacorporation/bettersignal"
-import { TNetServer } from "@trizacorporation/tnet"
-import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
+import { BetterSignal, BetterSignalType } from "@rbxts/bettersignal"
+import { TNetServer, Middleware } from "@rbxts/tnet"
 import { Service } from "./Dependencies"
 
 export default class FrameworkServer {
@@ -25,42 +24,65 @@ export default class FrameworkServer {
             MainServiceFolder.Name = "Services"
             MainServiceFolder.Parent = script.Parent
 
-            for (const [ServiceName, Info] of Services){
-                const ServiceData = Services.get(ServiceName)
-                const ServerNetworkServer = new TNetServer(Info.Middleware)
-                if (!ServiceData) return
-                if (ServiceData) ServiceData.TNetServer = ServerNetworkServer
+            const InitializationQueue: string[] = []
 
-                if(Info.Middleware){
-                    if (Middleware){
-                        if(!ServiceData?.Middleware){
-                            ServiceData.Middleware = {
-                                Inbound: [],
-                                Outbound: []
-                            }
-                        }else{
-                            if(!ServiceData.Middleware.Inbound){
-                                ServiceData.Middleware.Inbound = []
-                            }
-                            if(!ServiceData.Middleware.Outbound){
-                                ServiceData.Middleware.Outbound = []
-                            }
+            for (const [ServiceName, _] of pairs (Services)){
+                InitializationQueue.push(ServiceName)
+            }
+
+            for (const [_, ServiceName] of InitializationQueue){
+                const ServiceData = Services.get(ServiceName)
+                const DependencyNumber = ServiceData?.Dependencies && ServiceData.Dependencies.size() || 0
+                const LastPos = InitializationQueue.indexOf(ServiceName)
+                let NewIndex = 0
+                if (DependencyNumber > 0){
+                    assert(ServiceData?.Dependencies)
+                    for (const [_, Dependency] of pairs(ServiceData?.Dependencies)){
+                        const DependencyIndex = InitializationQueue.indexOf(Dependency)
+                        if (DependencyIndex > NewIndex){
+                            NewIndex = DependencyIndex + 1
                         }
-                        if(Middleware.Inbound){
-                            for (const Handler of Middleware.Inbound){
-                                ServiceData.Middleware.Inbound?.push(Handler)
-                            }
+                    }
+                }else{
+                    NewIndex = 1
+                }
+                InitializationQueue.remove(LastPos)
+                InitializationQueue.insert(NewIndex, ServiceName)
+            }
+
+            for (const [_, ServiceName] of InitializationQueue){
+                const ServiceData = Services.get(ServiceName)
+                if (!ServiceData) return
+                if(Middleware){
+                    if(!ServiceData?.Middleware){
+                        ServiceData.Middleware = {
+                            Inbound: [],
+                            Outbound: []
                         }
-                        if(Middleware.Outbound){
-                            for (const Handler of Middleware.Outbound){
-                                ServiceData.Middleware.Outbound?.push(Handler)
-                            }
+                    }else{
+                        if(!ServiceData.Middleware.Inbound){
+                            ServiceData.Middleware.Inbound = []
+                        }
+                        if(!ServiceData.Middleware.Outbound){
+                            ServiceData.Middleware.Outbound = []
+                        }
+                    }
+                    if(Middleware.Inbound){
+                        for (const Handler of Middleware.Inbound){
+                            ServiceData.Middleware.Inbound?.push(Handler)
+                        }
+                    }
+                    if(Middleware.Outbound){
+                        for (const Handler of Middleware.Outbound){
+                            ServiceData.Middleware.Outbound?.push(Handler)
                         }
                     }
                 }
-                if (Info.Client && ServiceData?.Client){
+                const ServerNetworkServer = new TNetServer(ServiceData.Middleware)
+                if (ServiceData) ServiceData.TNetServer = ServerNetworkServer
+                if (ServiceData.Client && ServiceData?.Client){
                     const ServiceFolder = new Instance("Folder")
-                    ServiceFolder.Name = Info.Name
+                    ServiceFolder.Name = ServiceData.Name
                     ServiceFolder.Parent = MainServiceFolder
                     const SignalsFolder = new Instance("Folder")
                     SignalsFolder.Name = "Signals"
@@ -68,7 +90,7 @@ export default class FrameworkServer {
                     const FunctionsFolder = new Instance("Folder")
                     FunctionsFolder.Name = "Functions"
                     FunctionsFolder.Parent = ServiceFolder
-                    for (const [itemName, item] of pairs(Info.Client)){
+                    for (const [itemName, item] of pairs(ServiceData.Client)){
                         const Name = itemName as string
                         const ItemData = item as Callback | string
 
@@ -101,8 +123,8 @@ export default class FrameworkServer {
                         }
                     }
                 }
-                Info.Initialize && Info.Initialize()
-                Info.Start && Info.Start()
+                ServiceData.Initialize && ServiceData.Initialize()
+                ServiceData.Start && ServiceData.Start()
             }
             OnStart.Fire(true)
             return true
@@ -115,7 +137,7 @@ export default class FrameworkServer {
             if (service.IsA("ModuleScript")){
                 const data = require(service) as {default: Service}
                 const serviceData = data.default
-                if (serviceData){
+                if (serviceData instanceof Service){
                     this.Services.set(serviceData.Name, serviceData)
                 }
             }

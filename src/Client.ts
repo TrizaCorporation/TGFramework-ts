@@ -1,6 +1,5 @@
-import { BetterSignal, BetterSignalType } from "@trizacorporation/bettersignal"
-import { TNetClient } from "@trizacorporation/tnet"
-import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
+import { BetterSignal, BetterSignalType } from "@rbxts/bettersignal"
+import { TNetClient, Middleware } from "@rbxts/tnet"
 import { Controller, GetController } from "./Dependencies"
 
 export default class FrameworkClient {
@@ -23,40 +22,64 @@ export default class FrameworkClient {
         const Controllers = this.Controllers
         const OnStart = this.OnStart
         return Promise.try(function(){
-            for (const [ControllerName, Info] of Controllers){
-                const ControllerNetworkClient = new TNetClient(Info.Middleware)
-                const ControllerData = GetController(ControllerName)
+            const InitializationQueue: string[] = []
+
+            for (const [ControllerName, _] of pairs (Controllers)){
+                InitializationQueue.push(ControllerName)
+            }
+
+            for (const [_, ControllerName] of InitializationQueue){
+                const ControllerData = Controllers.get(ControllerName)
+                const DependencyNumber = ControllerData?.Dependencies && ControllerData.Dependencies.size() || 0
+                const LastPos = InitializationQueue.indexOf(ControllerName)
+                let NewIndex = 0
+                if (DependencyNumber > 0){
+                    assert(ControllerData?.Dependencies)
+                    for (const [_, Dependency] of pairs(ControllerData?.Dependencies)){
+                        const DependencyIndex = InitializationQueue.indexOf(Dependency)
+                        if (DependencyIndex > NewIndex){
+                            NewIndex = DependencyIndex + 1
+                        }
+                    }
+                }else{
+                    NewIndex = 1
+                }
+                InitializationQueue.remove(LastPos)
+                InitializationQueue.insert(NewIndex, ControllerName)
+            }
+
+            for (const [_, ControllerName] of InitializationQueue){
+                const ControllerData = Controllers.get(ControllerName)
                 if (!ControllerData) return
-                if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
-                if(Info.Middleware){
-                    if (Middleware){
-                        if(!ControllerData?.Middleware){
-                            ControllerData.Middleware = {
-                                Inbound: [],
-                                Outbound: []
-                            }
-                        }else{
-                            if(!ControllerData.Middleware.Inbound){
-                                ControllerData.Middleware.Inbound = []
-                            }
-                            if(!ControllerData.Middleware.Outbound){
-                                ControllerData.Middleware.Outbound = []
-                            }
+                if(Middleware){
+                    if(!ControllerData?.Middleware){
+                        ControllerData.Middleware = {
+                            Inbound: [],
+                            Outbound: []
                         }
-                        if(Middleware.Inbound){
-                            for (const Handler of Middleware.Inbound){
-                                ControllerData.Middleware.Inbound?.push(Handler)
-                            }
+                    }else{
+                        if(!ControllerData.Middleware.Inbound){
+                            ControllerData.Middleware.Inbound = []
                         }
-                        if(Middleware.Outbound){
-                            for (const Handler of Middleware.Outbound){
-                                ControllerData.Middleware.Outbound?.push(Handler)
-                            }
+                        if(!ControllerData.Middleware.Outbound){
+                            ControllerData.Middleware.Outbound = []
+                        }
+                    }
+                    if(Middleware.Inbound){
+                        for (const Handler of Middleware.Inbound){
+                            ControllerData.Middleware.Inbound?.push(Handler)
+                        }
+                    }
+                    if(Middleware.Outbound){
+                        for (const Handler of Middleware.Outbound){
+                            ControllerData.Middleware.Outbound?.push(Handler)
                         }
                     }
                 }
-                Info.Initialize && Info.Initialize()
-                Info.Start && Info.Start()
+                const ControllerNetworkClient = new TNetClient(ControllerData.Middleware)
+                if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
+                ControllerData.Initialize && ControllerData.Initialize()
+                ControllerData.Start && ControllerData.Start()
             }
             OnStart.Fire(true)
             return true
@@ -69,7 +92,7 @@ export default class FrameworkClient {
             if (controller.IsA("ModuleScript")){
                 const data = require(controller) as {default: Controller}
                 const controllerData = data.default
-                if (controllerData){
+                if (controllerData instanceof Controller){
                     this.Controllers.set(controllerData.Name, controllerData)
                 }
             }

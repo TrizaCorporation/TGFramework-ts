@@ -1,7 +1,2 @@
-import { Controller } from "./Controller";
-import { Service } from "./Service";
-
-export {
-    Controller,
-    Service
-}
+export * from "./Service"
+export * from "./Controller"

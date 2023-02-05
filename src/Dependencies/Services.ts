@@ -1,6 +1,5 @@
 import { RunService } from "@rbxts/services"
-import { TNetServer } from "@trizacorporation/tnet"
-import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
+import { TNetServer, Middleware } from "@rbxts/tnet"
 import { Controller, GetController } from "./Controllers"
 
 let Services: Map<string, Service> = new Map()
@@ -11,6 +10,7 @@ interface ClientServiceMarker {
 
 export class Service {
     Name: string
+    Dependencies?: [string]
     Initialize?(): void
     Start?(): void
     Middleware?: Middleware

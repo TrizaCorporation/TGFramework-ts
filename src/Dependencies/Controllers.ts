@@ -1,10 +1,10 @@
-import { TNetClient } from "@trizacorporation/tnet"
-import { Middleware } from "@trizacorporation/tnet/out/Dependencies/Types"
+import { TNetClient, Middleware } from "@rbxts/tnet"
 
 let Controllers: Map<string, Controller> = new Map()
 
 export class Controller {
     Name: string
+    Dependencies?: [string]
     Initialize?(): void
     Start?(): void
     Middleware?: Middleware

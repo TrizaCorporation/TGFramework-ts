@@ -24,11 +24,11 @@ export default class FrameworkClient {
         return Promise.try(function(){
             const InitializationQueue: string[] = []
 
-            for (const [ControllerName, _] of pairs (Controllers)){
+            for (const [ControllerName, _] of pairs(Controllers)){
                 InitializationQueue.push(ControllerName)
             }
 
-            for (const [_, ControllerName] of InitializationQueue){
+            for (const [_, ControllerName] of pairs(InitializationQueue)){
                 const ControllerData = Controllers.get(ControllerName)
                 const DependencyNumber = ControllerData?.Dependencies && ControllerData.Dependencies.size() || 0
                 const LastPos = InitializationQueue.indexOf(ControllerName)
@@ -48,7 +48,7 @@ export default class FrameworkClient {
                 InitializationQueue.insert(NewIndex, ControllerName)
             }
 
-            for (const [_, ControllerName] of InitializationQueue){
+            for (const [_, ControllerName] of pairs(InitializationQueue)){
                 const ControllerData = Controllers.get(ControllerName)
                 if (!ControllerData) return
                 if(Middleware){

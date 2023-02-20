@@ -19,7 +19,7 @@ export default class FrameworkServer {
         this.Middleware = Middleware
         const Services = this.Services
         const OnStart = this.OnStart
-        return Promise.try(function(){
+        return new Promise(function(resolve){
             const MainServiceFolder = new Instance("Folder")
             MainServiceFolder.Name = "Services"
             MainServiceFolder.Parent = script.Parent
@@ -49,6 +49,8 @@ export default class FrameworkServer {
                 InitializationQueue.remove(LastPos)
                 InitializationQueue.insert(NewIndex, ServiceName)
             }
+
+            const InitializationPromises: Array<Promise<void>> = []
 
             for (const [_, ServiceName] of InitializationQueue){
                 const ServiceData = Services.get(ServiceName)
@@ -123,11 +125,24 @@ export default class FrameworkServer {
                         }
                     }
                 }
-                ServiceData.Initialize && ServiceData.Initialize()
-                ServiceData.Start && ServiceData.Start()
+                ServiceData.Initialize && InitializationPromises[InitializationPromises.size()] === new Promise(function(serviceResolve){
+                    debug.setmemorycategory(ServiceData.Name)
+                    ServiceData.Initialize && ServiceData.Initialize()
+                    serviceResolve(undefined)
+                })
             }
+
+            resolve(Promise.all(InitializationPromises))
+        }).then(() => {
+            for (const [_, Service] of Services){
+                Service.Start && task.spawn(() => {
+                    debug.setmemorycategory(Service.Name)
+                    Service.Start && Service.Start()
+                })
+            }
+            
+            this.Started = true
             OnStart.Fire(true)
-            return true
         })
     }
 

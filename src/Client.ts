@@ -21,7 +21,7 @@ export default class FrameworkClient {
         this.Middleware = Middleware
         const Controllers = this.Controllers
         const OnStart = this.OnStart
-        return Promise.try(function(){
+        return new Promise(function(resolve){
             const InitializationQueue: string[] = []
 
             for (const [ControllerName, _] of pairs (Controllers)){
@@ -47,6 +47,8 @@ export default class FrameworkClient {
                 InitializationQueue.remove(LastPos)
                 InitializationQueue.insert(NewIndex, ControllerName)
             }
+
+            const InitializationPromises: Array<Promise<void>> = []
 
             for (const [_, ControllerName] of InitializationQueue){
                 const ControllerData = Controllers.get(ControllerName)
@@ -78,11 +80,24 @@ export default class FrameworkClient {
                 }
                 const ControllerNetworkClient = new TNetClient(ControllerData.Middleware)
                 if (ControllerData) ControllerData.TNetClient = ControllerNetworkClient
-                ControllerData.Initialize && ControllerData.Initialize()
-                ControllerData.Start && ControllerData.Start()
+                ControllerData.Initialize && InitializationPromises[InitializationPromises.size()] === new Promise(function(controllerResolve){
+                    debug.setmemorycategory(ControllerData.Name)
+                    ControllerData.Initialize && ControllerData.Initialize()
+                    controllerResolve(undefined)
+                })
             }
+
+            resolve(Promise.all(InitializationPromises))
+        }).then(() => {
+            for (const [_, Controller] of Controllers){
+                Controller.Start && task.spawn(() => {
+                    debug.setmemorycategory(Controller.Name)
+                    Controller.Start && Controller.Start()
+                })
+            }
+            
+            this.Started = true
             OnStart.Fire(true)
-            return true
         })
     }
 

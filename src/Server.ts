@@ -26,11 +26,11 @@ export default class FrameworkServer {
 
             const InitializationQueue: string[] = []
 
-            for (const [ServiceName, _] of pairs (Services)){
+            for (const [ServiceName, _] of pairs(Services)){
                 InitializationQueue.push(ServiceName)
             }
 
-            for (const [_, ServiceName] of InitializationQueue){
+            for (const [_, ServiceName] of pairs(InitializationQueue)){
                 const ServiceData = Services.get(ServiceName)
                 const DependencyNumber = ServiceData?.Dependencies && ServiceData.Dependencies.size() || 0
                 const LastPos = InitializationQueue.indexOf(ServiceName)
@@ -52,7 +52,7 @@ export default class FrameworkServer {
 
             const InitializationPromises: Array<Promise<void>> = []
 
-            for (const [_, ServiceName] of InitializationQueue){
+            for (const [_, ServiceName] of pairs(InitializationQueue)){
                 const ServiceData = Services.get(ServiceName)
                 if (!ServiceData) return
                 if(Middleware){

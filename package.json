@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/tgframework",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "",
   "main": "out/init.lua",
   "scripts": {

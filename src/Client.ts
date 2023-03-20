@@ -103,15 +103,22 @@ export default class FrameworkClient {
 
     AddControllers(directory: Instance, deep?: boolean){
         const files = deep? directory.GetDescendants() : directory.GetChildren()
+        const requirePromises: Promise<void>[] = []
+        
         for (const controller of files){
             if (controller.IsA("ModuleScript")){
-                const data = require(controller) as {default: Controller}
-                const controllerData = data.default
-                if (controllerData instanceof Controller){
-                    this.Controllers.set(controllerData.Name, controllerData)
-                }
+                requirePromises.push(new Promise((resolve) => {
+                    const data = require(controller) as {default: Controller}
+                    const controllerData = data.default
+                    if (controllerData instanceof Controller){
+                        this.Controllers.set(controllerData.Name, controllerData)
+                    }
+                    resolve()
+                }))
             }
         }
+
+        Promise.all(requirePromises).await()
     }
 
     /*

@@ -148,15 +148,22 @@ export default class FrameworkServer {
 
     AddServices(directory: Instance, deep?: boolean){
         const files = deep? directory.GetDescendants() : directory.GetChildren()
+        const requirePromises: Promise<void>[] = []
+
         for (const service of files){
             if (service.IsA("ModuleScript")){
-                const data = require(service) as {default: Service}
-                const serviceData = data.default
-                if (serviceData instanceof Service){
-                    this.Services.set(serviceData.Name, serviceData)
-                }
+                requirePromises.push(new Promise((resolve) => {
+                    const data = require(service) as {default: Service}
+                    const serviceData = data.default
+                    if (serviceData instanceof Service){
+                        this.Services.set(serviceData.Name, serviceData)
+                    }
+                })
+                )
             }
         }
+
+        Promise.all(requirePromises).await()
     }
 
     /*

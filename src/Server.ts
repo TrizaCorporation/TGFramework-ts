@@ -158,8 +158,8 @@ export default class FrameworkServer {
                     if (serviceData instanceof Service){
                         this.Services.set(serviceData.Name, serviceData)
                     }
-                })
-                )
+                    resolve()
+                }))
             }
         }
 
